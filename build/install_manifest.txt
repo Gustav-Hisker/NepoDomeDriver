@@ -1,0 +1,2 @@
+/usr/bin/nepo_dome
+/usr/share/indi/nepo_dome.xml
