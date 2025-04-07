@@ -192,7 +192,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/libindi/basedevice.h \
   /usr/include/libindi/indibase.h \
   /usr/include/libindi/indiapi.h \
-  /usr/include/libindi/sharedblob.h \
   /usr/include/libindi/indidevapi.h \
   /usr/include/libindi/lilxml.h \
   /usr/include/libindi/indibasetypes.h \
@@ -221,6 +220,14 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/aarch64-linux-gnu/bits/types/struct_statx.h \
   /usr/include/c++/12/ctime \
   /usr/include/libindi/indimacros.h \
+  /usr/include/unistd.h \
+  /usr/include/aarch64-linux-gnu/bits/posix_opt.h \
+  /usr/include/aarch64-linux-gnu/bits/environments.h \
+  /usr/include/aarch64-linux-gnu/bits/confname.h \
+  /usr/include/aarch64-linux-gnu/bits/getopt_posix.h \
+  /usr/include/aarch64-linux-gnu/bits/getopt_core.h \
+  /usr/include/aarch64-linux-gnu/bits/unistd_ext.h \
+  /usr/include/linux/close_range.h \
   /usr/include/c++/12/memory \
   /usr/include/c++/12/bits/stl_uninitialized.h \
   /usr/include/c++/12/bits/stl_tempbuf.h \
@@ -393,6 +400,14 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/array:
 
+/usr/include/c++/12/bits/stl_bvector.h:
+
+/usr/include/c++/12/vector:
+
+/usr/include/c++/12/bits/erase_if.h:
+
+/usr/include/c++/12/bits/unordered_map.h:
+
 /usr/include/c++/12/bits/range_access.h:
 
 /usr/include/libindi/indibase.h:
@@ -445,6 +460,10 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/string:
 
+/usr/include/c++/12/bits/node_handle.h:
+
+/usr/include/c++/12/ext/atomicity.h:
+
 /usr/include/strings.h:
 
 /usr/include/aarch64-linux-gnu/c++/12/bits/gthr-default.h:
@@ -481,8 +500,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h:
 
-/usr/include/libindi/sharedblob.h:
-
 /usr/include/aarch64-linux-gnu/c++/12/bits/c++allocator.h:
 
 /usr/include/aarch64-linux-gnu/c++/12/bits/ctype_base.h:
@@ -490,6 +507,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/bits/locale_classes.h:
 
 /usr/include/c++/12/bits/exception_defines.h:
+
+/usr/include/aarch64-linux-gnu/bits/getopt_posix.h:
 
 /usr/include/c++/12/bits/exception_ptr.h:
 
@@ -537,6 +556,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/cerrno:
 
+/usr/include/aarch64-linux-gnu/bits/posix_opt.h:
+
 /usr/include/c++/12/iostream:
 
 /usr/include/c++/12/bits/deque.tcc:
@@ -550,10 +571,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/aarch64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/c++/12/cstdint:
-
-/usr/include/c++/12/ext/atomicity.h:
-
-/usr/include/c++/12/bits/node_handle.h:
 
 /usr/include/aarch64-linux-gnu/bits/types/struct_sched_param.h:
 
@@ -685,6 +702,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/libindi/parentdevice.h:
 
+/usr/include/aarch64-linux-gnu/bits/getopt_core.h:
+
 /usr/include/c++/12/tr1/bessel_function.tcc:
 
 /usr/include/c++/12/cwchar:
@@ -801,6 +820,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/bits/hashtable.h:
 
+/usr/include/aarch64-linux-gnu/bits/unistd_ext.h:
+
 /usr/include/libindi/indipropertyview.h:
 
 /usr/include/aarch64-linux-gnu/bits/uintn-identity.h:
@@ -856,8 +877,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/wctype.h:
 
 /usr/include/c++/12/bits/streambuf_iterator.h:
-
-/usr/include/c++/12/vector:
 
 /usr/include/aarch64-linux-gnu/c++/12/bits/ctype_inline.h:
 
@@ -931,6 +950,12 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/aarch64-linux-gnu/bits/types/struct_statx_timestamp.h:
 
+/usr/include/aarch64-linux-gnu/bits/environments.h:
+
+/usr/include/unistd.h:
+
+/usr/include/linux/close_range.h:
+
 /usr/include/c++/12/memory:
 
 /usr/include/c++/12/bits/stl_raw_storage_iter.h:
@@ -938,6 +963,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/bit:
 
 /usr/include/c++/12/bits/shared_ptr_base.h:
+
+/usr/include/aarch64-linux-gnu/bits/confname.h:
 
 /usr/include/c++/12/bits/nested_exception.h:
 
@@ -956,9 +983,3 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/unordered_map:
 
 /usr/include/c++/12/bits/enable_special_members.h:
-
-/usr/include/c++/12/bits/unordered_map.h:
-
-/usr/include/c++/12/bits/erase_if.h:
-
-/usr/include/c++/12/bits/stl_bvector.h:

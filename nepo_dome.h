@@ -12,7 +12,6 @@ public:
     virtual const char *getDefaultName() override;
     //virtual bool saveConfigItems(FILE *fp) override;
 
-
 protected:
     bool Connect() override;
     bool Disconnect() override;

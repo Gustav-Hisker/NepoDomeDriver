@@ -3,7 +3,7 @@
 
 #include "nepo_dome.h"
 
-#include "indicom.h"
+#include "libindi/indicom.h"
 
 #include <cmath>
 #include <cstring>
@@ -20,7 +20,7 @@
 
 
 
-using namespace std;
+//using namespace std;
 
 static std::unique_ptr<NepoDomeDriver> nepoDomeDriver(new NepoDomeDriver());
 
@@ -78,11 +78,6 @@ const char *NepoDomeDriver::getDefaultName()
 
 bool NepoDomeDriver::Connect()
 {
-    right();
-    time_sleep(2);
-    left();
-    time_sleep(2);
-    stopRot();
     LOG_INFO("Dome connected successfully!");
     return true;
 }
@@ -102,7 +97,7 @@ bool NepoDomeDriver::initPiGPIO() {
 
     // Setting up relays
     int relay_pins[] = {PIN_R, PIN_L, PIN_O, PIN_C};
-    string relay_names[] = {"right", "left", "open", "close"};
+    std::string relay_names[] = {"right", "left", "open", "close"};
     for (int i = 0; i < 4; i++) {
         int err = gpioSetMode(relay_pins[i], PI_OUTPUT);
         if (err) {
@@ -114,7 +109,7 @@ bool NepoDomeDriver::initPiGPIO() {
 
     // Setting up sensors
     int sensor_pins[] = {PIN_ISO, PIN_ISC};
-    string sensor_names[] = {"is open", "is closed"};
+    std::string sensor_names[] = {"is open", "is closed"};
     for (int i = 0; i < 2; i++) {
         int err = gpioSetMode(sensor_pins[i], PI_INPUT);
         if (err) {
@@ -128,6 +123,9 @@ bool NepoDomeDriver::initPiGPIO() {
         }
     }
 
+    // starting Timer loop
+    SetTimer(10);
+
     return true;
 }
 
@@ -137,28 +135,25 @@ bool NepoDomeDriver::initProperties()
 
     SetParkDataType(PARK_AZ);
 
+    addAuxControls();
+
     bool ok = initPiGPIO();
     if (!ok) {
         return false;
     }
-
-    right();
-    time_sleep(2);
-    left();
-    time_sleep(2);
-    stopRot();
-
-    SetTimer(10);
 
     return true;
 }
 
 void NepoDomeDriver::TimerHit() {
     // hanle shutter movement
+    LOG_INFO("TimerHit called");
     if (currentShutterAction == ShutterAction::OPENING){
         if (isOpen()){
             stopShutter();
             currentShutterAction = ShutterAction::OPEN;
+            DomeShutterSP.setState(IPS_OK);
+            DomeShutterSP.apply();
         } else {
             open();
         }
@@ -166,6 +161,8 @@ void NepoDomeDriver::TimerHit() {
         if (isClosed()){
             stopShutter();
             currentShutterAction = ShutterAction::CLOSED;
+            DomeShutterSP.setState(IPS_OK);
+            DomeShutterSP.apply();
         } else {
             close();
         }
@@ -180,11 +177,13 @@ IPState NepoDomeDriver::ControlShutter(ShutterOperation operation)
         if (currentShutterAction == ShutterAction::OPEN)
             return IPS_OK;
         currentShutterAction = ShutterAction::OPENING;
+        LOG_INFO("Set action to opening");
         return IPS_BUSY;
     } else {
         if (currentShutterAction == ShutterAction::CLOSED)
             return IPS_OK;
         currentShutterAction = ShutterAction::CLOSING;
+        LOG_INFO("Set action to closing");
         return IPS_BUSY;
     }
 }

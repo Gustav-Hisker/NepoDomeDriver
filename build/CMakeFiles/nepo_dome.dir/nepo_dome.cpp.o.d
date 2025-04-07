@@ -154,10 +154,10 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: \
  /usr/include/libindi/indidome.h /usr/include/libindi/defaultdevice.h \
  /usr/include/libindi/parentdevice.h /usr/include/libindi/basedevice.h \
  /usr/include/libindi/indibase.h /usr/include/libindi/indiapi.h \
- /usr/include/libindi/sharedblob.h /usr/include/libindi/indidevapi.h \
- /usr/include/libindi/lilxml.h /usr/include/libindi/indibasetypes.h \
- /usr/include/libindi/indiproperty.h /usr/include/libindi/indiutility.h \
- /usr/include/c++/12/cstring /usr/include/string.h /usr/include/strings.h \
+ /usr/include/libindi/indidevapi.h /usr/include/libindi/lilxml.h \
+ /usr/include/libindi/indibasetypes.h /usr/include/libindi/indiproperty.h \
+ /usr/include/libindi/indiutility.h /usr/include/c++/12/cstring \
+ /usr/include/string.h /usr/include/strings.h \
  /usr/include/aarch64-linux-gnu/sys/stat.h \
  /usr/include/aarch64-linux-gnu/bits/stat.h \
  /usr/include/aarch64-linux-gnu/bits/struct_stat.h \
@@ -172,7 +172,14 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: \
  /usr/include/aarch64-linux-gnu/bits/types/struct_statx_timestamp.h \
  /usr/include/aarch64-linux-gnu/bits/types/struct_statx.h \
  /usr/include/c++/12/ctime /usr/include/libindi/indimacros.h \
- /usr/include/c++/12/memory /usr/include/c++/12/bits/stl_uninitialized.h \
+ /usr/include/unistd.h /usr/include/aarch64-linux-gnu/bits/posix_opt.h \
+ /usr/include/aarch64-linux-gnu/bits/environments.h \
+ /usr/include/aarch64-linux-gnu/bits/confname.h \
+ /usr/include/aarch64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/aarch64-linux-gnu/bits/getopt_core.h \
+ /usr/include/aarch64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h /usr/include/c++/12/memory \
+ /usr/include/c++/12/bits/stl_uninitialized.h \
  /usr/include/c++/12/bits/stl_tempbuf.h \
  /usr/include/c++/12/bits/stl_raw_storage_iter.h \
  /usr/include/c++/12/bits/align.h /usr/include/c++/12/bit \
