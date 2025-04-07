@@ -17,7 +17,8 @@
 
 #define PIN_ISO 26
 #define PIN_ISC 16
-
+#define PIN_ISN 13
+#define PIN_ROT 12
 
 
 //using namespace std;
@@ -62,7 +63,7 @@ void stopShutter() {
     gpioWrite(PIN_C, PI_ON);
 }
 
-// check funktion for sensors
+// check funktions for sensors
 bool isOpen() {
     return 0 == gpioRead(PIN_ISO);
 }
@@ -71,13 +72,39 @@ bool isClosed() {
     return 0 == gpioRead(PIN_ISC);
 }
 
-const char *NepoDomeDriver::getDefaultName()
+bool rawIsNorthed() {
+    return 1 == gpioRead(PIN_ISN);
+}
+
+bool isNorthed() {
+    int res = 0;
+    for (int i = 0; i < 100000; i++) {
+        res += rawIsNorthed();
+    }
+    return res > 50000;
+}
+
+bool rawIsRotImp() {
+    return 1 == gpioRead(PIN_ROT);
+}
+
+bool isRotImp() {
+    int res = 0;
+    for (int i = 0; i < 100000; i++) {
+        res += rawIsRotImp();
+    }
+    return res > 50000;
+}
+
+const char* NepoDomeDriver::getDefaultName()
 {
     return "Nepo Dome Driver";
 }
 
 bool NepoDomeDriver::Connect()
 {
+    LOGF_INFO("%i impulses", rotImps);
+
     if (isOpen()) {
         currentShutterAction = ShutterAction::OPEN;
         DomeShutterSP[0].setState(ISS_ON);
@@ -93,12 +120,16 @@ bool NepoDomeDriver::Connect()
     }
     DomeShutterSP.apply();
 
+    while (true) {
+        LOGF_INFO("Northed: %s Imp: %s", isNorthed() ? "yes" : "no", isRotImp() ? "yes" : "no");
+        sleep(1);
+    }
+
     LOG_INFO("Dome connected successfully!");
     return true;
 }
 
-bool NepoDomeDriver::Disconnect()
-{
+bool NepoDomeDriver::Disconnect() {
     LOG_INFO("Dome disconnected successfully!");
     return true;
 }
@@ -123,8 +154,8 @@ bool NepoDomeDriver::initPiGPIO() {
     }
 
     // Setting up sensors
-    int sensor_pins[] = {PIN_ISO, PIN_ISC};
-    std::string sensor_names[] = {"is open", "is closed"};
+    int sensor_pins[] = {PIN_ISO, PIN_ISC, PIN_ISN, PIN_ROT};
+    std::string sensor_names[] = {"is open", "is closed", "is northed", "rotation meassuring impuls"};
     for (int i = 0; i < 2; i++) {
         int err = gpioSetMode(sensor_pins[i], PI_INPUT);
         if (err) {
@@ -137,9 +168,6 @@ bool NepoDomeDriver::initPiGPIO() {
             return false;
         }
     }
-
-    // starting Timer loop
-    SetTimer(10);
 
     return true;
 }
@@ -158,13 +186,40 @@ bool NepoDomeDriver::initProperties()
         return false;
     }
 
+    // calibrating rotational meassurements
+    // moving to the leftmost point that's still north
+    right();
+    while (isNorthed()) {};
+    while (!isNorthed()) {};
+    stopRot();
+    sleep(1);
+    // counting switches of rotation impuls sensor while turning around 360°
+    bool prevState = isRotImp();
+    right();
+    while (isNorthed()) {
+        bool currState = isRotImp();
+        rotImps += prevState != currState;
+        prevState = currState;
+    }
+    while (!isNorthed()) {
+        bool currState = isRotImp();
+        rotImps += prevState != currState;
+        prevState = currState;
+    }
+    stopRot();
+    // the Count of impulses has to be half of the amount of switches because every impuls is counted twice: rising edge and falling edge
+    rotImps /= 2;
+
+    // starting Timer loop
+    SetTimer(10);
+
     return true;
 }
 
 void NepoDomeDriver::TimerHit() {
-    // hanle shutter movement
-    if (currentShutterAction == ShutterAction::OPENING){
-        if (isOpen()){
+    // handle shutter movement
+    if (currentShutterAction == ShutterAction::OPENING) {
+        if (isOpen()) {
             stopShutter();
             currentShutterAction = ShutterAction::OPEN;
             DomeShutterSP.setState(IPS_OK);
@@ -172,8 +227,8 @@ void NepoDomeDriver::TimerHit() {
         } else {
             open();
         }
-    } else if (currentShutterAction == ShutterAction::CLOSING){
-        if (isClosed()){
+    } else if (currentShutterAction == ShutterAction::CLOSING) {
+        if (isClosed()) {
             stopShutter();
             currentShutterAction = ShutterAction::CLOSED;
             DomeShutterSP.setState(IPS_OK);
@@ -181,7 +236,22 @@ void NepoDomeDriver::TimerHit() {
         } else {
             close();
         }
+    } else {
+        stopShutter();
     }
+
+    // handle dome rotation
+    // meassurements
+    if (isNorthed()) {
+        DomeAbsPosNP[0].setValue(range360(0));
+    }
+    /*/
+    if (isNorthed()) {
+        stopRot();
+    } else {
+        right();
+    }
+    /**/
 
     // call setTimer to continue the loop
     SetTimer(10);
@@ -203,33 +273,77 @@ IPState NepoDomeDriver::ControlShutter(ShutterOperation operation)
 }
 
 IPState NepoDomeDriver::Move(DomeDirection dir, DomeMotionCommand operation) {
+    if (operation == DomeMotionCommand::MOTION_STOP) {
+        stopRot();
+        DomeAbsPosNP.setState(IPS_OK);
+        DomeAbsPosNP.apply();
+        return IPS_OK;
+    }
 
+    if (dir == DomeDirection::DOME_CW) {
+        right();
+        DomeAbsPosNP.setState(IPS_BUSY);
+    } else if (dir == DomeDirection::DOME_CCW) {
+        left();
+        DomeAbsPosNP.setState(IPS_BUSY);
+    }
+    DomeAbsPosNP.apply();
+    return IPS_BUSY;
 }
 
 IPState NepoDomeDriver::MoveRel(double azDiff) {
+    targetedAz = range360(DomeAbsPosNP[0].getValue() + azDiff);
 
+    return IPS_BUSY;
 }
 
 IPState NepoDomeDriver::MoveAbs(double az) {
+    targetedAz = az;
 
+    return IPS_BUSY;
 }
 
-IPState NepoDomeDriver::Park() {
+IPState NepoDomeDriver::Park()
+{
+    IPState s = NepoDomeDriver::ControlShutter(SHUTTER_CLOSE);
+    IPState d = IPS_OK; //NepoDomeDriver::MoveAbs(GetAxis1Park());
 
+    SetParked(true);
+
+    if (s == IPS_OK && d == IPS_OK)
+        return IPS_OK;
+    if (s == IPS_ALERT || d == IPS_ALERT)
+        return IPS_ALERT;
+    return IPS_OK;
 }
 
 IPState NepoDomeDriver::UnPark() {
+    LOG_INFO("UnPark was called");
+    DomeAbsPosNP.setState(IPS_OK);
+    DomeAbsPosNP.apply();
+    NepoDomeDriver::ControlShutter(SHUTTER_OPEN);
 
+    SetParked(false);
+    return IPS_OK;
 }
 
-bool NepoDomeDriver::Abort() {
-
+bool NepoDomeDriver::Abort()
+{
+    if (DomeShutterSP.getState() == IPS_BUSY) {
+        currentShutterAction = ShutterAction::STOPPED;
+        DomeShutterSP.setState(IPS_ALERT);
+        DomeShutterSP.apply();
+    }
+    Move(DOME_CW, MOTION_STOP);
+    return true;
 }
 
 bool NepoDomeDriver::SetCurrentPark() {
-
+    SetAxis1Park(DomeAbsPosNP[0].getValue());
+    return true;
 }
 
 bool NepoDomeDriver::SetDefaultPark() {
-
+    SetAxis1Park(90);
+    return true;
 }

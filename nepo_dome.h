@@ -32,6 +32,7 @@ protected:
 
 private:
     bool initPiGPIO();
+    int rotImps;
     double targetedAz;
     enum ShutterAction {
         OPEN,
