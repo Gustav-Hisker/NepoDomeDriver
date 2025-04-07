@@ -57,17 +57,17 @@ void close() {
     gpioWrite(PIN_C, PI_OFF);
 }
 
-void stopShutter(){
+void stopShutter() {
     gpioWrite(PIN_O, PI_ON);
     gpioWrite(PIN_C, PI_ON);
 }
 
 // check funktion for sensors
-bool isOpen(){
+bool isOpen() {
     return 0 == gpioRead(PIN_ISO);
 }
 
-bool isClosed(){
+bool isClosed() {
     return 0 == gpioRead(PIN_ISC);
 }
 
@@ -78,6 +78,21 @@ const char *NepoDomeDriver::getDefaultName()
 
 bool NepoDomeDriver::Connect()
 {
+    if (isOpen()) {
+        currentShutterAction = ShutterAction::OPEN;
+        DomeShutterSP[0].setState(ISS_ON);
+        DomeShutterSP[1].setState(ISS_OFF);
+    } else if (isClosed()) {
+        currentShutterAction = ShutterAction::CLOSED;
+        DomeShutterSP[0].setState(ISS_ON);
+        DomeShutterSP[1].setState(ISS_OFF);
+    } else {
+        //Dome isn't open or closed
+        currentShutterAction = ShutterAction::STOPPED;
+        DomeShutterSP.setState(IPS_ALERT);
+    }
+    DomeShutterSP.apply();
+
     LOG_INFO("Dome connected successfully!");
     return true;
 }
@@ -91,7 +106,7 @@ bool NepoDomeDriver::Disconnect()
 bool NepoDomeDriver::initPiGPIO() {
     // Initialization of PIGPIO
     if (gpioInitialise() < 0) {
-        LOG_INFO("Initialization of PIGPIO failed");
+        LOG_ERROR("Initialization of PIGPIO failed");
         return false;
     }
 
@@ -101,7 +116,7 @@ bool NepoDomeDriver::initPiGPIO() {
     for (int i = 0; i < 4; i++) {
         int err = gpioSetMode(relay_pins[i], PI_OUTPUT);
         if (err) {
-            LOG_INFO((std::string("Setting the mode of GPIO ") + relay_names[i] + std::string(" (" + std::to_string(relay_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
+            LOG_ERROR((std::string("Setting the mode of GPIO ") + relay_names[i] + std::string(" (" + std::to_string(relay_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
             return false;
         }
         gpioWrite(relay_pins[i], PI_ON);
@@ -113,12 +128,12 @@ bool NepoDomeDriver::initPiGPIO() {
     for (int i = 0; i < 2; i++) {
         int err = gpioSetMode(sensor_pins[i], PI_INPUT);
         if (err) {
-            LOG_INFO((std::string("Setting the mode of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
+            LOG_ERROR((std::string("Setting the mode of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
             return false;
         }
         err = gpioSetPullUpDown(sensor_pins[i], PI_PUD_DOWN);
         if (err) {
-            LOG_INFO((std::string("Setting the pull down of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
+            LOG_ERROR((std::string("Setting the pull down of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
             return false;
         }
     }
@@ -137,6 +152,7 @@ bool NepoDomeDriver::initProperties()
 
     addAuxControls();
 
+    // initialization of PiGPIO
     bool ok = initPiGPIO();
     if (!ok) {
         return false;
@@ -147,7 +163,6 @@ bool NepoDomeDriver::initProperties()
 
 void NepoDomeDriver::TimerHit() {
     // hanle shutter movement
-    LOG_INFO("TimerHit called");
     if (currentShutterAction == ShutterAction::OPENING){
         if (isOpen()){
             stopShutter();
@@ -168,6 +183,7 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
+    // call setTimer to continue the loop
     SetTimer(10);
 }
 
@@ -177,13 +193,11 @@ IPState NepoDomeDriver::ControlShutter(ShutterOperation operation)
         if (currentShutterAction == ShutterAction::OPEN)
             return IPS_OK;
         currentShutterAction = ShutterAction::OPENING;
-        LOG_INFO("Set action to opening");
         return IPS_BUSY;
     } else {
         if (currentShutterAction == ShutterAction::CLOSED)
             return IPS_OK;
         currentShutterAction = ShutterAction::CLOSING;
-        LOG_INFO("Set action to closing");
         return IPS_BUSY;
     }
 }
@@ -192,30 +206,30 @@ IPState NepoDomeDriver::Move(DomeDirection dir, DomeMotionCommand operation) {
 
 }
 
-IPState NepoDomeDriver::MoveRel(double azDiff){
+IPState NepoDomeDriver::MoveRel(double azDiff) {
 
 }
 
-IPState NepoDomeDriver::MoveAbs(double az){
+IPState NepoDomeDriver::MoveAbs(double az) {
 
 }
 
-IPState NepoDomeDriver::Park(){
+IPState NepoDomeDriver::Park() {
 
 }
 
-IPState NepoDomeDriver::UnPark(){
+IPState NepoDomeDriver::UnPark() {
 
 }
 
-bool NepoDomeDriver::Abort(){
+bool NepoDomeDriver::Abort() {
 
 }
 
-bool NepoDomeDriver::SetCurrentPark(){
+bool NepoDomeDriver::SetCurrentPark() {
 
 }
 
-bool NepoDomeDriver::SetDefaultPark(){
+bool NepoDomeDriver::SetDefaultPark() {
 
 }
