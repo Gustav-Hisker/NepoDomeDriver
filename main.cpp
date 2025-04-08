@@ -1,6 +1,5 @@
-#include <pigpio/pigpio.h>
+#include "pigpio/pigpio.h"
 #include <iostream>
-
 
 #define PIN_R 22
 #define PIN_L 23
@@ -10,9 +9,8 @@
 #define PIN_ISO 26
 #define PIN_ISC 16
 #define PIN_ISN 13
-#define PIN_ROT 6
+#define PIN_ROT 12
 
-using namespace std;
 
 void right()
 {
@@ -67,7 +65,7 @@ bool isRotImp() {
 bool initPiGPIO() {
     // Initialization of PIGPIO
     if (gpioInitialise() < 0) {
-        LOG_ERROR("Initialization of PIGPIO failed");
+        std::cout << "Initialization of PIGPIO failed" << std::endl;
         return false;
     }
 
@@ -77,7 +75,7 @@ bool initPiGPIO() {
     for (int i = 0; i < 4; i++) {
         int err = gpioSetMode(relay_pins[i], PI_OUTPUT);
         if (err) {
-            cout << ((std::string("Setting the mode of GPIO ") + relay_names[i] + std::string(" (" + std::to_string(relay_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str()) << endl;
+            std::cout << "Setting the mode of GPIO " << relay_names[i] << " (" << relay_pins[i] << ") failed. Error code: " << err << std::endl;
             return false;
         }
         gpioWrite(relay_pins[i], PI_ON);
@@ -89,12 +87,12 @@ bool initPiGPIO() {
     for (int i = 0; i < 2; i++) {
         int err = gpioSetMode(sensor_pins[i], PI_INPUT);
         if (err) {
-            cout << ((std::string("Setting the mode of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str()) << endl;
+            std::cout << "Setting the mode of GPIO " << sensor_names[i] << " (" << sensor_pins[i] << ") failed. Error code: " << err << std::endl;
             return false;
         }
-        err = gpioSetPullUpDown(sensor_pins[i], PI_PUD_DOWN);
+        err = gpioSetPullUpDown(sensor_pins[i], PI_PUD_UP);
         if (err) {
-            cout << ((std::string("Setting the pull down of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str()) << endl;
+            std::cout << "Setting the pull down of GPIO " << sensor_names[i] << " (" << sensor_pins[i] << ") failed. Error code: " << err << std::endl;
             return false;
         }
     }
@@ -104,22 +102,11 @@ bool initPiGPIO() {
 
 int main(int argc, char *argv[])
 {
-   if (gpioInitialise() < 0) {
-      cout << "Initialization of GPIO failed" << endl;
-      return -1;
+   initPiGPIO();
+
+   right();
+
+   while (true){
+      std::cout << gpioRead(PIN_ISN) << " | " << gpioRead(PIN_ROT) << std::endl;
    }
-
-   int err = gpioSetMode(PIN_R, PI_INPUT);
-   if (err) {
-      cout << "Setting the Mode of" << R_PIN << " failed. Error code: " << err << endl;
-      return -1;
-   }
-
-   gpioWrite(PIN_R, PI_ON)
-   time_sleep(1);
-   gpioWrite(PIN_R, PI_OFF)
-   time_sleep(1);
-   gpioWrite(PIN_R, PI_ON)
-
-   gpioTerminate();
 }

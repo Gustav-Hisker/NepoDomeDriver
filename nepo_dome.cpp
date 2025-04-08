@@ -30,20 +30,17 @@ NepoDomeDriver::NepoDomeDriver() {
 }
 
 // Control funktions for motors
-void right()
-{
+void right() {
     gpioWrite(PIN_L, PI_ON);
     gpioWrite(PIN_R, PI_OFF);
 }
 
-void left()
-{
+void left() {
     gpioWrite(PIN_R, PI_ON);
     gpioWrite(PIN_L, PI_OFF);
 }
 
-void stopRot()
-{
+void stopRot() {
     gpioWrite(PIN_R, PI_ON);
     gpioWrite(PIN_L, PI_ON);
 }
@@ -72,28 +69,12 @@ bool isClosed() {
     return 0 == gpioRead(PIN_ISC);
 }
 
-bool rawIsNorthed() {
-    return 1 == gpioRead(PIN_ISN);
-}
-
 bool isNorthed() {
-    int res = 0;
-    for (int i = 0; i < 100000; i++) {
-        res += rawIsNorthed();
-    }
-    return res > 50000;
-}
-
-bool rawIsRotImp() {
-    return 1 == gpioRead(PIN_ROT);
+    return 0 == gpioRead(PIN_ISN);
 }
 
 bool isRotImp() {
-    int res = 0;
-    for (int i = 0; i < 100000; i++) {
-        res += rawIsRotImp();
-    }
-    return res > 50000;
+    return 0 == gpioRead(PIN_ROT);
 }
 
 const char* NepoDomeDriver::getDefaultName()
@@ -119,11 +100,6 @@ bool NepoDomeDriver::Connect()
         DomeShutterSP.setState(IPS_ALERT);
     }
     DomeShutterSP.apply();
-
-    while (true) {
-        LOGF_INFO("Northed: %s Imp: %s", isNorthed() ? "yes" : "no", isRotImp() ? "yes" : "no");
-        sleep(1);
-    }
 
     LOG_INFO("Dome connected successfully!");
     return true;
@@ -189,18 +165,12 @@ bool NepoDomeDriver::initProperties()
     // calibrating rotational meassurements
     // moving to the leftmost point that's still north
     right();
-    while (isNorthed()) {};
     while (!isNorthed()) {};
     stopRot();
-    sleep(1);
+    while (isNorthed()) {};
     // counting switches of rotation impuls sensor while turning around 360°
     bool prevState = isRotImp();
     right();
-    while (isNorthed()) {
-        bool currState = isRotImp();
-        rotImps += prevState != currState;
-        prevState = currState;
-    }
     while (!isNorthed()) {
         bool currState = isRotImp();
         rotImps += prevState != currState;
@@ -347,3 +317,4 @@ bool NepoDomeDriver::SetDefaultPark() {
     SetAxis1Park(90);
     return true;
 }
+
