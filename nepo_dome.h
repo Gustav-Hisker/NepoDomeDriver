@@ -9,6 +9,7 @@ public:
     virtual ~NepoDomeDriver() = default;
 
     virtual bool initProperties() override;
+    virtual bool updateProperties() override;
     virtual const char *getDefaultName() override;
     virtual bool saveConfigItems(FILE *fp) override;
 
@@ -41,6 +42,7 @@ private:
     };
     ShutterAction currentShutterAction;
     void calibrate();
+    INDI::PropertySwitch CalibrateSP {1};
     INDI::PropertyNumber impCount {1};
     INDI::PropertyNumber speed {2};
     INDI::PropertyNumber impToNorthOffset {1};
@@ -54,4 +56,5 @@ private:
     bool prevImpState;
     double targetedAz;
     bool moveToTarget;
+    bool shallPark;
 };

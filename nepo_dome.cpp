@@ -115,7 +115,13 @@ bool NepoDomeDriver::Connect()
 
     LOG_INFO("Dome connected successfully!");
 
-    calibrate();
+    LOGF_INFO("    Offset between north and its right impuls: %f°", impToNorthOffset[0].getValue());
+    LOGF_INFO("    Counterclockwise speed: %f°/ms", speed[SPEED_L].getValue());
+    LOGF_INFO("    Clockwise speed: %f°/ms", speed[SPEED_R].getValue());
+    LOGF_INFO("    Rotation impulses per complete rotation: %f", impCount[0].getValue());
+    LOG_INFO("Calibration:");
+
+    //calibrate();
 
     return true;
 }
@@ -265,8 +271,53 @@ bool NepoDomeDriver::initProperties()
         return false;
     }
 
+    calibrate();
+
+    CalibrateSP[0].fill(
+        "Calibrate",
+        "Calibrating",
+        ISS_OFF
+    );
+
+    CalibrateSP.fill(
+        getDeviceName(),
+        "Calibrate",
+        "Calibrate", 
+        MAIN_CONTROL_TAB,
+        IP_RW,
+        ISR_ATMOST1,
+        600,
+        IPS_OK
+    );
+
+    CalibrateSP.onUpdate([this]
+    {
+        CalibrateSP.setState(IPS_BUSY);
+        CalibrateSP.apply();
+        calibrate();
+        CalibrateSP.reset();
+        CalibrateSP.setState(IPS_OK);
+        CalibrateSP.apply();
+    });
+
     // starting Timer loop
     SetTimer(10);
+
+    return true;
+}
+
+bool NepoDomeDriver::updateProperties()
+{
+    INDI::Dome::updateProperties();
+
+    if (isConnected())
+    {
+        defineProperty(CalibrateSP);
+    }
+    else
+    {
+        deleteProperty(CalibrateSP);
+    }
 
     return true;
 }
@@ -346,6 +397,8 @@ void NepoDomeDriver::TimerHit() {
         DomeAbsPosNP.setState(IPS_OK);
         DomeRelPosNP.setState(IPS_OK);
         DomeRelPosNP.apply();
+        DomeMotionSP.setState(IPS_OK);
+        DomeMotionSP.apply();
     }
     DomeAbsPosNP[0].setValue(range360(nextPos));
     DomeAbsPosNP.apply();
