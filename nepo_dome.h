@@ -44,8 +44,11 @@ private:
     void calibrate();
     INDI::PropertyNumber impCount {1};
     INDI::PropertyNumber speed {2};
+    INDI::PropertyNumber impToNorthOffset {1};
     enum {
         SPEED_R,
         SPEED_L
     };
+    double nextRightImpAz;
+    double nextLeftImpAz;
 };

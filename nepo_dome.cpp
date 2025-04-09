@@ -153,7 +153,7 @@ bool NepoDomeDriver::initPiGPIO() {
     return true;
 }
 
-void NepoDomeDriver::calibrate(){
+void NepoDomeDriver::calibrate() {
     // calibrating rotational meassurements
     // moving to the leftmost point that's north
     LOG_INFO("Started calibration");
@@ -178,21 +178,41 @@ void NepoDomeDriver::calibrate(){
     long time_finished = getMillis();
     // the Count of impulses has to be half of the amount of edges because every impuls is counted twice: rising edge and falling edge
     impCount[0].setValue(edges / 2);
+    impCount.apply();
     // the speed is meassured in °/ms
     speed[SPEED_R].setValue(360.0/(time_finished - time_started));
+
     // meassuring the time a full left/counterclockwise rotation (leftmost north to leftmost north)
     // the modell overshoots sometimes after rotating clockwise and is therefore rotated slightly right of the north that's why it's rotating counterclockwise back to north
     // to still be reliable it rotates 1 second to the right to guarantee an overshoot
     sleep(1);
     left();
-    while (!isNorthed()) {}; 
+    while (!isNorthed()) {};
     while (isNorthed()) {};
     time_started = getMillis();
     while (!isNorthed()) {};
     while (isNorthed()) {};
     time_finished = getMillis();
-    stopRot();
     speed[SPEED_L].setValue(360.0/(time_finished - time_started));
+    speed.apply();
+
+    //again creating an overshoot/offset (this time to the left)
+    sleep(1);
+    right();
+    //meassuring the positions of the imps
+    while (!isNorthed()) {};
+    if (isRotImp()) { // avoid meassuring uncertainty in the case at north is also a imp
+        impToNorthOffset[0].setValue(0);
+    } else {
+        time_started = getMillis();
+        while (!isRotImp()) {};
+        time_finished = getMillis();
+        impToNorthOffset[0].setValue(speed[SPEED_R].getValue()*(time_finished-time_started));
+    }
+    impToNorthOffset.apply()
+
+    // TODO nextRight and nextLeft
+
     LOGF_INFO("Counterclockwise speed: %f°/ms", speed[SPEED_L].getValue());
     LOGF_INFO("Clockwise speed: %f°/ms", speed[SPEED_R].getValue());
     LOGF_INFO("Rotation impulses per complete rotation:%f", impCount[0].getValue());
@@ -355,5 +375,6 @@ bool NepoDomeDriver::saveConfigItems(FILE *fp) {
     Dome::saveConfigItems(fp);
     impCount.save(fp);
     speed.save(fp);
+    impToNorthOffset.save(fp);
     return true;
 }
