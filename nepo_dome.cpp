@@ -34,19 +34,29 @@ inline long getMillis() {
 }
 
 // Control funktions for motors
+enum RotDirection {
+    RIGHT,
+    LEFT,
+    NONE
+};
+RotDirection curRot = RotDirection::NONE;
+
 void right() {
     gpioWrite(PIN_L, PI_ON);
     gpioWrite(PIN_R, PI_OFF);
+    curRot = RotDirection::RIGHT;
 }
 
 void left() {
     gpioWrite(PIN_R, PI_ON);
     gpioWrite(PIN_L, PI_OFF);
+    curRot = RotDirection::LEFT;
 }
 
 void stopRot() {
     gpioWrite(PIN_R, PI_ON);
     gpioWrite(PIN_L, PI_ON);
+    curRot = RotDirection::NONE;
 }
 
 void open() {
@@ -157,6 +167,8 @@ void NepoDomeDriver::calibrate() {
     // calibrating rotational meassurements
     // moving to the leftmost point that's north
     LOG_INFO("Started calibration");
+    DomeAbsPosNP.setState(IPS_BUSY);
+    DomeAbsPosNP.apply();
     right();
     while (!isNorthed()) {};
     // start of time meassurement of a full right/clockwise rotation (leftmost north to leftmost north)
@@ -196,26 +208,46 @@ void NepoDomeDriver::calibrate() {
     speed[SPEED_L].setValue(360.0/(time_finished - time_started));
     speed.apply();
 
-    //again creating an overshoot/offset (this time to the left)
+    // again creating an overshoot/offset (this time to the left)
     sleep(1);
     right();
     //meassuring the positions of the imps
     while (!isNorthed()) {};
     if (isRotImp()) { // avoid meassuring uncertainty in the case at north is also a imp
+        stopRot();
         impToNorthOffset[0].setValue(0);
+        nextRightImpAz = 360.0 / impCount[0].getValue();
+        nextLeftImpAz = -360.0 / impCount[0].getValue();
     } else {
         time_started = getMillis();
         while (!isRotImp()) {};
         time_finished = getMillis();
         impToNorthOffset[0].setValue(speed[SPEED_R].getValue()*(time_finished-time_started));
+        nextRightImpAz = impToNorthOffset[0].getValue();
+        nextLeftImpAz = nextRightImpAz - 360.0 / impCount[0].getValue();
+        // again creating an overshoot/offset (to the right)
+        sleep(1);
+        //returning to North
+        left();
+        while (!isNorthed()) {};
+        stopRot();
     }
-    impToNorthOffset.apply()
+    impToNorthOffset.apply();
 
-    // TODO nextRight and nextLeft
+    if (impToNorthOffset[0].getValue() > (360.0 / impCount[0].getValue())){
+        LOG_WARN("Calibration failed: retrying");
+        calibrate();
+        return;
+    }
 
+    DomeAbsPosNP[0].setValue(0);
+    DomeAbsPosNP.setState(IPS_OK);
+    DomeAbsPosNP.apply();
+
+    LOGF_INFO("Offset between north and its right impuls: %f°", impToNorthOffset[0].getValue());
     LOGF_INFO("Counterclockwise speed: %f°/ms", speed[SPEED_L].getValue());
     LOGF_INFO("Clockwise speed: %f°/ms", speed[SPEED_R].getValue());
-    LOGF_INFO("Rotation impulses per complete rotation:%f", impCount[0].getValue());
+    LOGF_INFO("Rotation impulses per complete rotation: %f", impCount[0].getValue());
     LOG_INFO("Finished calibration");
 }
 
@@ -265,16 +297,67 @@ void NepoDomeDriver::TimerHit() {
 
     // handle dome rotation
     // meassurements
-    if (isNorthed()) {
-        DomeAbsPosNP[0].setValue(range360(0));
+    double nextPos = DomeAbsPosNP[0].getValue();
+    long now = getMillis();
+    bool currImpState = isRotImp();
+
+    if (curRot == RotDirection::RIGHT) {
+        nextPos += speed[SPEED_R].getValue()*(now - lastMeassurements);
+        if (currImpState && !prevImpState) {
+            nextPos = nextRightImpAz;
+            nextRightImpAz += 360.0 / impCount[0].getValue();
+            nextLeftImpAz = nextRightImpAz - 720.0 / impCount[0].getValue();
+        }
+    } else if (curRot == RotDirection::LEFT) {
+        nextPos -= speed[SPEED_L].getValue()*(now - lastMeassurements);
+        if (currImpState && !prevImpState) {
+            nextPos = nextLeftImpAz;
+            nextLeftImpAz -= 360.0 / impCount[0].getValue();
+            nextRightImpAz = nextLeftImpAz + 720.0 / impCount[0].getValue();
+        }
     }
-    /*/
+
+    // 540° is 1.5*360° this is to check if nextLeftImpAz and nextRightImpAz have a difference of 1 or 2 times 360.0 / impCount[0].getValue() and avoids rounding errors
+    if (prevImpState && !currImpState) {
+        if (curRot == RotDirection::RIGHT) {
+            nextLeftImpAz += 360.0 / impCount[0].getValue();
+        } else if (curRot == RotDirection::LEFT) {
+            nextRightImpAz -= 360.0 / impCount[0].getValue();
+        }
+    }
+
     if (isNorthed()) {
+        nextPos = 0;
+        if (impToNorthOffset[0].getValue()==0) {
+            nextRightImpAz = 360.0 / impCount[0].getValue();
+            nextLeftImpAz = -360.0 / impCount[0].getValue();
+        } else {
+            nextRightImpAz = impToNorthOffset[0].getValue();
+            nextLeftImpAz = nextRightImpAz - 360.0 / impCount[0].getValue();
+        }
+    }
+
+    lastMeassurements = now;
+    prevImpState = currImpState;
+    // check if targetedAz lies between current and next position
+    if (moveToTarget && ((range360(DomeAbsPosNP[0].getValue() - targetedAz)<180) != (range360(nextPos - targetedAz)<180))) {
+        moveToTarget = false;
         stopRot();
-    } else {
-        right();
+        DomeAbsPosNP.setState(IPS_OK);
+        DomeRelPosNP.setState(IPS_OK);
+        DomeRelPosNP.apply();
     }
-    /**/
+    DomeAbsPosNP[0].setValue(range360(nextPos));
+    DomeAbsPosNP.apply();
+
+    if (moveToTarget) {
+        if (range360(DomeAbsPosNP[0].getValue() - targetedAz)<180) {
+            left();
+        } else {
+            right();
+        }
+    }
+
 
     // call setTimer to continue the loop
     SetTimer(10);
@@ -296,10 +379,13 @@ IPState NepoDomeDriver::ControlShutter(ShutterOperation operation)
 }
 
 IPState NepoDomeDriver::Move(DomeDirection dir, DomeMotionCommand operation) {
+    moveToTarget = false;
     if (operation == DomeMotionCommand::MOTION_STOP) {
         stopRot();
         DomeAbsPosNP.setState(IPS_OK);
         DomeAbsPosNP.apply();
+        DomeRelPosNP.setState(IPS_OK);
+        DomeRelPosNP.apply();
         return IPS_OK;
     }
 
@@ -316,12 +402,14 @@ IPState NepoDomeDriver::Move(DomeDirection dir, DomeMotionCommand operation) {
 
 IPState NepoDomeDriver::MoveRel(double azDiff) {
     targetedAz = range360(DomeAbsPosNP[0].getValue() + azDiff);
+    moveToTarget = true;
 
     return IPS_BUSY;
 }
 
 IPState NepoDomeDriver::MoveAbs(double az) {
-    targetedAz = az;
+    targetedAz = range360(az);
+    moveToTarget = true;
 
     return IPS_BUSY;
 }

@@ -32,7 +32,6 @@ protected:
 
 private:
     bool initPiGPIO();
-    double targetedAz;
     enum ShutterAction {
         OPEN,
         OPENING,
@@ -51,4 +50,8 @@ private:
     };
     double nextRightImpAz;
     double nextLeftImpAz;
+    long lastMeassurements;
+    bool prevImpState;
+    double targetedAz;
+    bool moveToTarget;
 };
