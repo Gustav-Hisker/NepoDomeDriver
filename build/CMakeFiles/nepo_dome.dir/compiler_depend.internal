@@ -186,6 +186,12 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o
  /usr/include/c++/12/bits/ostream.tcc
  /usr/include/c++/12/istream
  /usr/include/c++/12/bits/istream.tcc
+ /usr/include/c++/12/chrono
+ /usr/include/c++/12/bits/chrono.h
+ /usr/include/c++/12/ratio
+ /usr/include/c++/12/limits
+ /usr/include/c++/12/ctime
+ /usr/include/c++/12/bits/parse_numbers.h
  /home/kuppel/Driver/nepo_dome.h
  /usr/include/libindi/indidome.h
  /usr/include/libindi/defaultdevice.h
@@ -219,7 +225,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o
  /usr/include/aarch64-linux-gnu/bits/statx-generic.h
  /usr/include/aarch64-linux-gnu/bits/types/struct_statx_timestamp.h
  /usr/include/aarch64-linux-gnu/bits/types/struct_statx.h
- /usr/include/c++/12/ctime
  /usr/include/libindi/indimacros.h
  /usr/include/unistd.h
  /usr/include/aarch64-linux-gnu/bits/posix_opt.h
@@ -303,7 +308,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o
  /usr/include/aarch64-linux-gnu/bits/mathcalls-narrow.h
  /usr/include/aarch64-linux-gnu/bits/iscanonical.h
  /usr/include/c++/12/bits/specfun.h
- /usr/include/c++/12/limits
  /usr/include/c++/12/tr1/gamma.tcc
  /usr/include/c++/12/tr1/special_function_util.h
  /usr/include/c++/12/tr1/bessel_function.tcc
@@ -329,4 +333,5 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o
  /usr/include/libnova/utility.h
  /usr/include/libnova/ln_types.h
  /usr/include/libindi/inditimer.h
+ /home/kuppel/Driver/build/config.h
 

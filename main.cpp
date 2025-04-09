@@ -1,5 +1,6 @@
 #include "pigpio/pigpio.h"
 #include <iostream>
+#include <chrono>
 
 #define PIN_R 22
 #define PIN_L 23
@@ -107,6 +108,7 @@ int main(int argc, char *argv[])
    right();
 
    while (true){
-      std::cout << gpioRead(PIN_ISN) << " | " << gpioRead(PIN_ROT) << std::endl;
+      std::cout << gpioRead(PIN_ISN) << " | " << gpioRead(PIN_ROT) << "  {  " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
+   
    }
 }

@@ -1,7 +1,9 @@
 #include <pigpio/pigpio.h>
 #include <iostream>
+#include <chrono>
 
 #include "nepo_dome.h"
+#include "config.h"
 
 #include "libindi/indicom.h"
 
@@ -21,12 +23,14 @@
 #define PIN_ROT 12
 
 
-//using namespace std;
-
 static std::unique_ptr<NepoDomeDriver> nepoDomeDriver(new NepoDomeDriver());
 
 NepoDomeDriver::NepoDomeDriver() {
     SetDomeCapability(DOME_CAN_ABORT | DOME_CAN_ABS_MOVE | DOME_CAN_REL_MOVE | DOME_CAN_PARK | DOME_HAS_SHUTTER);
+}
+
+inline long getMillis() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 // Control funktions for motors
@@ -84,8 +88,6 @@ const char* NepoDomeDriver::getDefaultName()
 
 bool NepoDomeDriver::Connect()
 {
-    LOGF_INFO("%i impulses", rotImps);
-
     if (isOpen()) {
         currentShutterAction = ShutterAction::OPEN;
         DomeShutterSP[0].setState(ISS_ON);
@@ -102,6 +104,9 @@ bool NepoDomeDriver::Connect()
     DomeShutterSP.apply();
 
     LOG_INFO("Dome connected successfully!");
+
+    calibrate();
+
     return true;
 }
 
@@ -148,6 +153,52 @@ bool NepoDomeDriver::initPiGPIO() {
     return true;
 }
 
+void NepoDomeDriver::calibrate(){
+    // calibrating rotational meassurements
+    // moving to the leftmost point that's north
+    LOG_INFO("Started calibration");
+    right();
+    while (!isNorthed()) {};
+    // start of time meassurement of a full right/clockwise rotation (leftmost north to leftmost north)
+    long time_started = getMillis();
+    // counting edges (both kinds) of rotation impuls sensor while turning around 360°
+    // time meassurement and counting of rotation impulses happens at the same time to save time
+    int edges = 0;
+    bool prevState = isRotImp();
+    while (isNorthed()) {
+        bool currState = isRotImp();
+        edges += prevState != currState;
+        prevState = currState;
+    }
+    while (!isNorthed()) {
+        bool currState = isRotImp();
+        edges += prevState != currState;
+        prevState = currState;
+    }
+    long time_finished = getMillis();
+    // the Count of impulses has to be half of the amount of edges because every impuls is counted twice: rising edge and falling edge
+    impCount[0].setValue(edges / 2);
+    // the speed is meassured in °/ms
+    speed[SPEED_R].setValue(360.0/(time_finished - time_started));
+    // meassuring the time a full left/counterclockwise rotation (leftmost north to leftmost north)
+    // the modell overshoots sometimes after rotating clockwise and is therefore rotated slightly right of the north that's why it's rotating counterclockwise back to north
+    // to still be reliable it rotates 1 second to the right to guarantee an overshoot
+    sleep(1);
+    left();
+    while (!isNorthed()) {}; 
+    while (isNorthed()) {};
+    time_started = getMillis();
+    while (!isNorthed()) {};
+    while (isNorthed()) {};
+    time_finished = getMillis();
+    stopRot();
+    speed[SPEED_L].setValue(360.0/(time_finished - time_started));
+    LOGF_INFO("Counterclockwise speed: %f°/ms", speed[SPEED_L].getValue());
+    LOGF_INFO("Clockwise speed: %f°/ms", speed[SPEED_R].getValue());
+    LOGF_INFO("Rotation impulses per complete rotation:%f", impCount[0].getValue());
+    LOG_INFO("Finished calibration");
+}
+
 bool NepoDomeDriver::initProperties()
 {
     INDI::Dome::initProperties();
@@ -161,24 +212,6 @@ bool NepoDomeDriver::initProperties()
     if (!ok) {
         return false;
     }
-
-    // calibrating rotational meassurements
-    // moving to the leftmost point that's still north
-    right();
-    while (!isNorthed()) {};
-    stopRot();
-    while (isNorthed()) {};
-    // counting switches of rotation impuls sensor while turning around 360°
-    bool prevState = isRotImp();
-    right();
-    while (!isNorthed()) {
-        bool currState = isRotImp();
-        rotImps += prevState != currState;
-        prevState = currState;
-    }
-    stopRot();
-    // the Count of impulses has to be half of the amount of switches because every impuls is counted twice: rising edge and falling edge
-    rotImps /= 2;
 
     // starting Timer loop
     SetTimer(10);
@@ -318,3 +351,9 @@ bool NepoDomeDriver::SetDefaultPark() {
     return true;
 }
 
+bool NepoDomeDriver::saveConfigItems(FILE *fp) {
+    Dome::saveConfigItems(fp);
+    impCount.save(fp);
+    speed.save(fp);
+    return true;
+}

@@ -185,6 +185,12 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/c++/12/bits/ostream.tcc \
   /usr/include/c++/12/istream \
   /usr/include/c++/12/bits/istream.tcc \
+  /usr/include/c++/12/chrono \
+  /usr/include/c++/12/bits/chrono.h \
+  /usr/include/c++/12/ratio \
+  /usr/include/c++/12/limits \
+  /usr/include/c++/12/ctime \
+  /usr/include/c++/12/bits/parse_numbers.h \
   /home/kuppel/Driver/nepo_dome.h \
   /usr/include/libindi/indidome.h \
   /usr/include/libindi/defaultdevice.h \
@@ -218,7 +224,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/aarch64-linux-gnu/bits/statx-generic.h \
   /usr/include/aarch64-linux-gnu/bits/types/struct_statx_timestamp.h \
   /usr/include/aarch64-linux-gnu/bits/types/struct_statx.h \
-  /usr/include/c++/12/ctime \
   /usr/include/libindi/indimacros.h \
   /usr/include/unistd.h \
   /usr/include/aarch64-linux-gnu/bits/posix_opt.h \
@@ -302,7 +307,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/aarch64-linux-gnu/bits/mathcalls-narrow.h \
   /usr/include/aarch64-linux-gnu/bits/iscanonical.h \
   /usr/include/c++/12/bits/specfun.h \
-  /usr/include/c++/12/limits \
   /usr/include/c++/12/tr1/gamma.tcc \
   /usr/include/c++/12/tr1/special_function_util.h \
   /usr/include/c++/12/tr1/bessel_function.tcc \
@@ -327,8 +331,11 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
   /usr/include/libindi/libastro.h \
   /usr/include/libnova/utility.h \
   /usr/include/libnova/ln_types.h \
-  /usr/include/libindi/inditimer.h
+  /usr/include/libindi/inditimer.h \
+  config.h
 
+
+config.h:
 
 /usr/include/libindi/inditimer.h:
 
@@ -355,8 +362,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/tr1/beta_function.tcc:
 
 /usr/include/c++/12/tr1/special_function_util.h:
-
-/usr/include/c++/12/limits:
 
 /usr/include/c++/12/bits/specfun.h:
 
@@ -408,6 +413,16 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/bits/unordered_map.h:
 
+/usr/include/c++/12/bits/enable_special_members.h:
+
+/usr/include/c++/12/bits/hashtable_policy.h:
+
+/usr/include/c++/12/bits/hashtable.h:
+
+/usr/include/c++/12/unordered_map:
+
+/usr/include/c++/12/bits/std_function.h:
+
 /usr/include/c++/12/bits/range_access.h:
 
 /usr/include/libindi/indibase.h:
@@ -423,8 +438,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/pstl/pstl_config.h:
 
 /usr/include/c++/12/bits/stl_function.h:
-
-/usr/include/c++/12/bits/std_function.h:
 
 /usr/include/c++/12/bits/invoke.h:
 
@@ -495,8 +508,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/asm-generic/posix_types.h:
 
 /usr/include/c++/12/backward/binders.h:
-
-/usr/include/c++/12/clocale:
 
 /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h:
 
@@ -690,8 +701,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/aarch64-linux-gnu/bits/long-double.h:
 
-/usr/include/c++/12/bits/hashtable_policy.h:
-
 /usr/include/aarch64-linux-gnu/bits/libc-header-start.h:
 
 /usr/include/aarch64-linux-gnu/c++/12/bits/cpu_defines.h:
@@ -818,8 +827,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/ext/concurrence.h:
 
-/usr/include/c++/12/bits/hashtable.h:
-
 /usr/include/aarch64-linux-gnu/bits/unistd_ext.h:
 
 /usr/include/libindi/indipropertyview.h:
@@ -866,6 +873,8 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/bits/streambuf.tcc:
 
+/usr/include/c++/12/bits/parse_numbers.h:
+
 /usr/include/c++/12/sstream:
 
 /usr/include/c++/12/bits/basic_ios.h:
@@ -884,6 +893,18 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 
 /usr/include/c++/12/bits/istream.tcc:
 
+/usr/include/c++/12/chrono:
+
+/usr/include/libindi/indiutility.h:
+
+/usr/include/c++/12/clocale:
+
+/usr/include/c++/12/bits/chrono.h:
+
+/usr/include/c++/12/ratio:
+
+/usr/include/c++/12/limits:
+
 /usr/include/aarch64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/libindi/defaultdevice.h:
@@ -901,8 +922,6 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/aarch64-linux-gnu/bits/mathcalls.h:
 
 /usr/include/libindi/indiproperty.h:
-
-/usr/include/libindi/indiutility.h:
 
 /usr/include/ctype.h:
 
@@ -979,7 +998,3 @@ CMakeFiles/nepo_dome.dir/nepo_dome.cpp.o: /home/kuppel/Driver/nepo_dome.cpp \
 /usr/include/c++/12/cstdarg:
 
 /usr/include/c++/12/functional:
-
-/usr/include/c++/12/unordered_map:
-
-/usr/include/c++/12/bits/enable_special_members.h:

@@ -10,7 +10,7 @@ public:
 
     virtual bool initProperties() override;
     virtual const char *getDefaultName() override;
-    //virtual bool saveConfigItems(FILE *fp) override;
+    virtual bool saveConfigItems(FILE *fp) override;
 
 protected:
     bool Connect() override;
@@ -32,7 +32,6 @@ protected:
 
 private:
     bool initPiGPIO();
-    int rotImps;
     double targetedAz;
     enum ShutterAction {
         OPEN,
@@ -42,4 +41,11 @@ private:
         CLOSED
     };
     ShutterAction currentShutterAction;
+    void calibrate();
+    INDI::PropertyNumber impCount {1};
+    INDI::PropertyNumber speed {2};
+    enum {
+        SPEED_R,
+        SPEED_L
+    };
 };
