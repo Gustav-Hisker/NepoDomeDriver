@@ -411,6 +411,12 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
+    if (shallPark && (!isParked()) && (!moveToTarget) && currentShutterAction == ShutterAction::CLOSED){
+        SetParked(true);
+        ParkSP.setState(IPS_OK);
+        ParkSP.apply();
+    }
+
 
     // call setTimer to continue the loop
     SetTimer(10);
@@ -470,19 +476,18 @@ IPState NepoDomeDriver::MoveAbs(double az) {
 IPState NepoDomeDriver::Park()
 {
     IPState s = NepoDomeDriver::ControlShutter(SHUTTER_CLOSE);
-    IPState d = IPS_OK; //NepoDomeDriver::MoveAbs(GetAxis1Park());
+    IPState d = NepoDomeDriver::MoveAbs(GetAxis1Park());
 
-    SetParked(true);
+    shallPark = true;
 
     if (s == IPS_OK && d == IPS_OK)
         return IPS_OK;
     if (s == IPS_ALERT || d == IPS_ALERT)
         return IPS_ALERT;
-    return IPS_OK;
+    return IPS_BUSY;
 }
 
 IPState NepoDomeDriver::UnPark() {
-    LOG_INFO("UnPark was called");
     DomeAbsPosNP.setState(IPS_OK);
     DomeAbsPosNP.apply();
     NepoDomeDriver::ControlShutter(SHUTTER_OPEN);
@@ -491,8 +496,8 @@ IPState NepoDomeDriver::UnPark() {
     return IPS_OK;
 }
 
-bool NepoDomeDriver::Abort()
-{
+bool NepoDomeDriver::Abort() {
+    shallPark = false;
     if (DomeShutterSP.getState() == IPS_BUSY) {
         currentShutterAction = ShutterAction::STOPPED;
         DomeShutterSP.setState(IPS_ALERT);
