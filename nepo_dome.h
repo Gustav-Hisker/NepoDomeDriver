@@ -11,7 +11,6 @@ public:
     virtual bool initProperties() override;
     virtual bool updateProperties() override;
     virtual const char *getDefaultName() override;
-    virtual bool saveConfigItems(FILE *fp) override;
 
 protected:
     bool Connect() override;
@@ -26,10 +25,6 @@ protected:
     virtual IPState UnPark() override;
     virtual IPState ControlShutter(ShutterOperation operation) override;
     virtual bool Abort() override;
-
-    // Parking
-    virtual bool SetCurrentPark() override;
-    virtual bool SetDefaultPark() override;
 
 private:
     bool initPiGPIO();
