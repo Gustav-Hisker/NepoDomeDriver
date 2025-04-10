@@ -151,7 +151,7 @@ bool NepoDomeDriver::initPiGPIO() {
     // Setting up sensors
     int sensor_pins[] = {PIN_ISO, PIN_ISC, PIN_ISN, PIN_ROT};
     std::string sensor_names[] = {"is open", "is closed", "is northed", "rotation meassuring impuls"};
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
         int err = gpioSetMode(sensor_pins[i], PI_INPUT);
         if (err) {
             LOG_ERROR((std::string("Setting the mode of GPIO ") + sensor_names[i] + std::string(" (" + std::to_string(sensor_pins[i]) + ") failed. Error code: " + std::to_string(err))).c_str());
