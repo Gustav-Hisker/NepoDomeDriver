@@ -352,6 +352,7 @@ void NepoDomeDriver::TimerHit() {
     long now = getMillis();
     bool currImpState = isRotImp();
 
+    // calculate next postition by speed and time or impulse
     if (curRot == RotDirection::RIGHT) {
         nextPos += speed[SPEED_R].getValue()*(now - lastMeassurements);
         if (currImpState && !prevImpState) {
@@ -368,7 +369,7 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
-    // 540° is 1.5*360° this is to check if nextLeftImpAz and nextRightImpAz have a difference of 1 or 2 times 360.0 / impCount[0].getValue() and avoids rounding errors
+    // check if impulse is passed 
     if (prevImpState && !currImpState) {
         if (curRot == RotDirection::RIGHT) {
             nextLeftImpAz += 360.0 / impCount[0].getValue();
@@ -377,6 +378,7 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
+    // resetting at north
     if (isNorthed()) {
         nextPos = 0;
         if (impToNorthOffset[0].getValue()==0) {
@@ -388,8 +390,7 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
-    lastMeassurements = now;
-    prevImpState = currImpState;
+
     // check if targetedAz lies between current and next position
     if (moveToTarget && ((range360(DomeAbsPosNP[0].getValue() - targetedAz)<180) != (range360(nextPos - targetedAz)<180))) {
         moveToTarget = false;
@@ -400,9 +401,14 @@ void NepoDomeDriver::TimerHit() {
         DomeMotionSP.setState(IPS_OK);
         DomeMotionSP.apply();
     }
+
+    // update variables
+    lastMeassurements = now;
+    prevImpState = currImpState;
     DomeAbsPosNP[0].setValue(range360(nextPos));
     DomeAbsPosNP.apply();
 
+    // starting motion if necessary
     if (moveToTarget) {
         if (range360(DomeAbsPosNP[0].getValue() - targetedAz)<180) {
             left();
@@ -411,6 +417,7 @@ void NepoDomeDriver::TimerHit() {
         }
     }
 
+    // setting parked if parkingPostion reached
     if (shallPark && (!isParked()) && (!moveToTarget) && currentShutterAction == ShutterAction::CLOSED){
         SetParked(true);
         ParkSP.setState(IPS_OK);
@@ -422,8 +429,7 @@ void NepoDomeDriver::TimerHit() {
     SetTimer(10);
 }
 
-IPState NepoDomeDriver::ControlShutter(ShutterOperation operation)
-{
+IPState NepoDomeDriver::ControlShutter(ShutterOperation operation) {
     if (operation == ShutterOperation::SHUTTER_OPEN) {
         if (currentShutterAction == ShutterAction::OPEN)
             return IPS_OK;
@@ -450,18 +456,24 @@ IPState NepoDomeDriver::Move(DomeDirection dir, DomeMotionCommand operation) {
 
     if (dir == DomeDirection::DOME_CW) {
         right();
-        DomeAbsPosNP.setState(IPS_BUSY);
-    } else if (dir == DomeDirection::DOME_CCW) {
+    } else {
         left();
-        DomeAbsPosNP.setState(IPS_BUSY);
     }
+    DomeAbsPosNP.setState(IPS_BUSY);
     DomeAbsPosNP.apply();
+    DomeRelPosNP.setState(IPS_BUSY);
+    DomeRelPosNP.apply();
     return IPS_BUSY;
 }
 
 IPState NepoDomeDriver::MoveRel(double azDiff) {
     targetedAz = range360(DomeAbsPosNP[0].getValue() + azDiff);
     moveToTarget = true;
+
+    DomeAbsPosNP.setState(IPS_BUSY);
+    DomeAbsPosNP.apply();
+    DomeMotionSP.setState(IPS_BUSY);
+    DomeMotionSP.apply();
 
     return IPS_BUSY;
 }
@@ -470,11 +482,15 @@ IPState NepoDomeDriver::MoveAbs(double az) {
     targetedAz = range360(az);
     moveToTarget = true;
 
+    DomeRelPosNP.setState(IPS_BUSY);
+    DomeRelPosNP.apply();
+    DomeMotionSP.setState(IPS_BUSY);
+    DomeMotionSP.apply();
+
     return IPS_BUSY;
 }
 
-IPState NepoDomeDriver::Park()
-{
+IPState NepoDomeDriver::Park() {
     IPState s = NepoDomeDriver::ControlShutter(SHUTTER_CLOSE);
     IPState d = NepoDomeDriver::MoveAbs(GetAxis1Park());
 
