@@ -502,8 +502,7 @@ IPState NepoDomeDriver::Park() {
 }
 
 IPState NepoDomeDriver::UnPark() {
-    DomeAbsPosNP.setState(IPS_OK);
-    DomeAbsPosNP.apply();
+    shallPark = false;
     NepoDomeDriver::ControlShutter(SHUTTER_OPEN);
 
     SetParked(false);
