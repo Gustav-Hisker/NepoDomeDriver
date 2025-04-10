@@ -121,8 +121,6 @@ bool NepoDomeDriver::Connect()
     LOGF_INFO("    Rotation impulses per complete rotation: %f", impCount[0].getValue());
     LOG_INFO("Calibration:");
 
-    //calibrate();
-
     return true;
 }
 
