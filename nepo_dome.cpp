@@ -527,7 +527,7 @@ bool NepoDomeDriver::SetCurrentPark() {
 }
 
 bool NepoDomeDriver::SetDefaultPark() {
-    SetAxis1Park(90);
+    SetAxis1Park(0);
     return true;
 }
 
