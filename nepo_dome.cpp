@@ -260,6 +260,7 @@ bool NepoDomeDriver::initProperties()
     INDI::Dome::initProperties();
 
     SetParkDataType(PARK_AZ);
+    SetAxis1ParkDefault(0);
 
     addAuxControls();
 
@@ -517,23 +518,5 @@ bool NepoDomeDriver::Abort() {
         DomeShutterSP.apply();
     }
     Move(DOME_CW, MOTION_STOP);
-    return true;
-}
-
-bool NepoDomeDriver::SetCurrentPark() {
-    SetAxis1Park(DomeAbsPosNP[0].getValue());
-    return true;
-}
-
-bool NepoDomeDriver::SetDefaultPark() {
-    SetAxis1Park(0);
-    return true;
-}
-
-bool NepoDomeDriver::saveConfigItems(FILE *fp) {
-    Dome::saveConfigItems(fp);
-    impCount.save(fp);
-    speed.save(fp);
-    impToNorthOffset.save(fp);
     return true;
 }
