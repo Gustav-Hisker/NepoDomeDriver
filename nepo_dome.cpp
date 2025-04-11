@@ -110,6 +110,8 @@ bool NepoDomeDriver::Connect()
         //Dome isn't open or closed
         currentShutterAction = ShutterAction::STOPPED;
         DomeShutterSP.setState(IPS_ALERT);
+        DomeShutterSP[0].setState(ISS_OFF);
+        DomeShutterSP[1].setState(ISS_OFF);
     }
     DomeShutterSP.apply();
 
@@ -515,6 +517,8 @@ bool NepoDomeDriver::Abort() {
     if (DomeShutterSP.getState() == IPS_BUSY) {
         currentShutterAction = ShutterAction::STOPPED;
         DomeShutterSP.setState(IPS_ALERT);
+        DomeShutterSP[0].setState(ISS_OFF);
+        DomeShutterSP[1].setState(ISS_OFF);
         DomeShutterSP.apply();
     }
     Move(DOME_CW, MOTION_STOP);
