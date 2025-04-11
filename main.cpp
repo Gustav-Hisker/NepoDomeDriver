@@ -1,3 +1,5 @@
+// this file is purely for testing
+
 #include "pigpio/pigpio.h"
 #include <iostream>
 #include <chrono>
