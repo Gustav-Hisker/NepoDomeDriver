@@ -104,8 +104,8 @@ bool NepoDomeDriver::Connect()
         DomeShutterSP[1].setState(ISS_OFF);
     } else if (isClosed()) {
         currentShutterAction = ShutterAction::CLOSED;
-        DomeShutterSP[0].setState(ISS_ON);
-        DomeShutterSP[1].setState(ISS_OFF);
+        DomeShutterSP[0].setState(ISS_OFF);
+        DomeShutterSP[1].setState(ISS_ON);
     } else {
         //Dome isn't open or closed
         currentShutterAction = ShutterAction::STOPPED;
