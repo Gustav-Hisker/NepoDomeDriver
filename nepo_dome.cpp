@@ -492,7 +492,12 @@ IPState NepoDomeDriver::MoveAbs(double az) {
 }
 
 IPState NepoDomeDriver::Park() {
+    DomeShutterSP[0].setState(ISS_OFF);
+    DomeShutterSP[1].setState(ISS_ON);
     IPState s = NepoDomeDriver::ControlShutter(SHUTTER_CLOSE);
+    DomeShutterSP.setState(s);
+    DomeShutterSP.apply();
+
     IPState d = NepoDomeDriver::MoveAbs(GetAxis1Park());
 
     shallPark = true;
@@ -506,7 +511,11 @@ IPState NepoDomeDriver::Park() {
 
 IPState NepoDomeDriver::UnPark() {
     shallPark = false;
-    NepoDomeDriver::ControlShutter(SHUTTER_OPEN);
+    DomeShutterSP[0].setState(ISS_ON);
+    DomeShutterSP[1].setState(ISS_OFF);
+    IPState s = NepoDomeDriver::ControlShutter(SHUTTER_OPEN);
+    DomeShutterSP.setState(s);
+    DomeShutterSP.apply();
 
     SetParked(false);
     return IPS_OK;
@@ -514,6 +523,7 @@ IPState NepoDomeDriver::UnPark() {
 
 bool NepoDomeDriver::Abort() {
     shallPark = false;
+
     if (DomeShutterSP.getState() == IPS_BUSY) {
         currentShutterAction = ShutterAction::STOPPED;
         DomeShutterSP.setState(IPS_ALERT);
@@ -521,6 +531,12 @@ bool NepoDomeDriver::Abort() {
         DomeShutterSP[1].setState(ISS_OFF);
         DomeShutterSP.apply();
     }
+
+    DomeMotionSP.setState(IPS_OK);
+    DomeMotionSP[0].setState(ISS_OFF);
+    DomeMotionSP[1].setState(ISS_OFF);
+    DomeMotionSP.apply();
     Move(DOME_CW, MOTION_STOP);
+
     return true;
 }
